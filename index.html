@@ -1,17 +1,20 @@
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time Notepad------</title>
+    <title>Thanzeer Real-Time Notepad</title>
 </head>
-<body>
-    <button id="copy-btn">Copy</button>
-    <button id="reset-btn">Reset</button>
-    <br>
-    <textarea id="notepad" rows="20" cols="100" placeholder="Paste your text here..."></textarea>
-   
-
+<body style="font-family: Arial, sans-serif; margin: 20px; display: flex; flex-direction: column; align-items: center;">
+    <h1 style="font-size: 24px; margin-bottom: 10px;">Thanzeer's Real-Time Notepad</h1>
+    <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+        <button id="copy-btn" style="padding: 10px; margin: 5px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; width: 100%; max-width: 200px;">Copy</button>
+        <button id="reset-btn" style="padding: 10px; margin: 5px; cursor: pointer; background-color: #f44336; color: white; border: none; border-radius: 5px; width: 100%; max-width: 200px;">Reset</button>
+    </div>
+    <textarea id="notepad" rows="10" style="width: 100%; max-width: 600px; height: 300px; padding: 10px; margin-top: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; resize: none;" placeholder="Paste your text here..."></textarea>
 
     <script>
         const notepad = document.getElementById('notepad');
@@ -24,16 +27,34 @@
             });
         };
 
-        // When text is pasted or changed, send the updated value to the server
-        notepad.addEventListener('input', () => {
+        // Debounce function to limit the rate of function execution
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
+        // Function to send the notepad content to the WebSocket
+        const sendToSocket = () => {
             ws.send(notepad.value);
-        });
+        };
+
+        // Debounced version of the send function
+        const debouncedSend = debounce(sendToSocket, 300); // 300 milliseconds delay
+
+        // When text is pasted or changed, send the updated value to the server with debounce
+        notepad.addEventListener('input', debouncedSend);
 
         // Copy button functionality
         document.getElementById('copy-btn').addEventListener('click', () => {
-            notepad.select();
-            document.execCommand('copy'); // Copies the selected text to the clipboard
-        
+            // Use the Clipboard API to copy text directly
+            navigator.clipboard.writeText(notepad.value).then(() => {
+          
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
         });
 
         // Reset button functionality
