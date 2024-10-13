@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Notepad</title>
+</head>
+<body>
+    <button id="copy-btn">Copy</button>
+    <button id="reset-btn">Reset</button>
+    <br>
+    <textarea id="notepad" rows="20" cols="100" placeholder="Paste your text here..."></textarea>
+   
+
+
+    <script>
+        const notepad = document.getElementById('notepad');
+        const ws = new WebSocket('ws://localhost:8080');
+
+        // When receiving a message, convert the Blob to text before updating the notepad
+        ws.onmessage = (event) => {
+            event.data.text().then(text => {
+                notepad.value = text;
+            });
+        };
+
+        // When text is pasted or changed, send the updated value to the server
+        notepad.addEventListener('input', () => {
+            ws.send(notepad.value);
+        });
+
+        // Copy button functionality
+        document.getElementById('copy-btn').addEventListener('click', () => {
+            notepad.select();
+            document.execCommand('copy'); // Copies the selected text to the clipboard
+        
+        });
+
+        // Reset button functionality
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            notepad.value = ''; // Clear the textarea
+            ws.send(''); // Broadcast the cleared content
+        });
+    </script>
+</body>
+</html>
