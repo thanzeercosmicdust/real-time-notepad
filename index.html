@@ -15,7 +15,7 @@
 
     <script>
         const notepad = document.getElementById('notepad');
-        const ws = new WebSocket('ws://localhost:8080');
+        const ws = new WebSocket('wss://real-time-notepad.onrender.com');
 
         // When receiving a message, convert the Blob to text before updating the notepad
         ws.onmessage = (event) => {
